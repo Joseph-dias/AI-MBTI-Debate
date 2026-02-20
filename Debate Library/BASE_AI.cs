@@ -1,6 +1,8 @@
 ﻿using OpenAI;
 using OpenAI.Chat;
+using OpenAI.Responses;
 using System.ClientModel;
+using static Debate_Library.AI_Tools;
 
 namespace Debate_Library
 {
@@ -11,7 +13,7 @@ namespace Debate_Library
         protected string model;
 
         //Chat message list
-        protected abstract List<ChatMessage> messages { get; set; }
+        protected List<ChatMessage> messages { get; set; }
         public BASE_AI(string model) 
         {
             apiKey = Environment.GetEnvironmentVariable("XAI_API_KEY") ?? throw new InvalidOperationException("Set XAI_API_KEY environment variable");
@@ -23,11 +25,25 @@ namespace Debate_Library
             });
 
             this.model = model; //Set the model
+            messages = new List<ChatMessage>(); //Initialize message list
+            messages.Add(new SystemChatMessage(""));
         }
 
+        /// <summary>
+        /// Sends the messages to the API and streams back the response
+        /// </summary>
+        /// <returns></returns>
         protected async IAsyncEnumerable<StreamingChatCompletionUpdate> sendRequestAsync()
         {
-            await foreach (StreamingChatCompletionUpdate update in client.GetChatClient(model).CompleteChatStreamingAsync(messages))
+            var options = new ChatCompletionOptions()
+            {
+                MaxOutputTokenCount = 100
+            };
+
+            options.Tools.Add(AI_Tools.WebSearchTool);
+            options.ToolChoice = ChatToolChoice.CreateAutoChoice();
+
+            await foreach (StreamingChatCompletionUpdate update in client.GetChatClient(model).CompleteChatStreamingAsync(messages, options))
             {
                 yield return update;
             }

@@ -8,4 +8,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Debate Library\Debate Library.csproj" />
+  </ItemGroup>
+
 </Project>
