@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Debate_Library.MBTI;
+using static Debate_Library.Personality;
 
 namespace Debate_Library
 {
-    public class AI_Handler : BASE_AI
+    public class AIDebateHandler : BASE_AI
     {
-        public AI_Handler(string model) : base(model) 
+        public AIDebateHandler(string model) : base(model) 
         {
         }
 
@@ -25,9 +25,9 @@ namespace Debate_Library
             messages.Add(new UserChatMessage("Debate Topic: " + topic)); //Setting the topic
         }
 
-        public async IAsyncEnumerable<char> getResponse(MbtiType type)
+        public async IAsyncEnumerable<char> getDebateResponse(MbtiType type)
         {
-            messages[0] = new SystemChatMessage(writeSystemMessage(type));
+            messages[0] = new SystemChatMessage(writeDebaterSystemMessage(type));
 
             bool repeat;
 
@@ -39,7 +39,7 @@ namespace Debate_Library
                 var toolCallIndex = 0;
                 List<ChatToolCall> toolCalls = new List<ChatToolCall>(); //Creating list of tool calls to send to the API if necessary
                 var assistantMsg = new AssistantChatMessage("This is a placeholder");
-                await foreach (StreamingChatCompletionUpdate update in sendRequestAsync())
+                await foreach (StreamingChatCompletionUpdate update in sendStreamingRequestAsync())
                 {
                     foreach (ChatMessageContentPart part in update.ContentUpdate)
                     {
@@ -106,7 +106,7 @@ namespace Debate_Library
         }
 
         //Private methods
-        private string writeSystemMessage(MbtiType type)
+        private string writeDebaterSystemMessage(MbtiType type)
         {
             return "You are a " + type.ToString() + " personality type.  A description of you is this: " + MbtiDescriptions[type] + "  You are in a debate with other personality types.  You may call them out by name and respond to points.  Each user message response from another type should start with their type and a colon.  You don't need to call out every other type that has spoken and you do not have to respond to every point.  Pick the most important points.  Only call out the other types if it's important and do it in the third person.  Your job right now is to respond to the user messages as your type (without saying explicitly what your type is).  Prioritize the last user message for your response and keep in mind the user message labeled as the debate topic.  Do not go off topic.  Keep response to 100 tokens or less.";
         }

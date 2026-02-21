@@ -34,7 +34,7 @@ namespace Debate_Library
         /// Sends the messages to the API and streams back the response
         /// </summary>
         /// <returns></returns>
-        protected async IAsyncEnumerable<StreamingChatCompletionUpdate> sendRequestAsync()
+        protected async IAsyncEnumerable<StreamingChatCompletionUpdate> sendStreamingRequestAsync()
         {
             var options = new ChatCompletionOptions()
             {

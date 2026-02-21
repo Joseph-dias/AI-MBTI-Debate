@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Random;
-using static Debate_Library.MBTI;
+using static Debate_Library.Personality;
 
 namespace Debate_Library
 {
