@@ -35,9 +35,9 @@ namespace Debate_Library
             {
                 repeat = false;
                 StringBuilder sb = new StringBuilder(type.ToString() + ": ");
-                StringBuilder toolcallStr = new StringBuilder();
+                StringBuilder toolcallStr = new StringBuilder(); //Building a tool call string if the tool call needs it
                 var toolCallIndex = 0;
-                List<ChatToolCall> toolCalls = new List<ChatToolCall>();
+                List<ChatToolCall> toolCalls = new List<ChatToolCall>(); //Creating list of tool calls to send to the API if necessary
                 var assistantMsg = new AssistantChatMessage("This is a placeholder");
                 await foreach (StreamingChatCompletionUpdate update in sendRequestAsync())
                 {
@@ -67,7 +67,7 @@ namespace Debate_Library
 
                     if (update.FinishReason.HasValue)
                     {
-                        if (update.FinishReason.Value == ChatFinishReason.ToolCalls && toolCalls.Count > 0)
+                        if (update.FinishReason.Value == ChatFinishReason.ToolCalls && toolCalls.Count > 0) //Tool call finish
                         {
                             assistantMsg = new AssistantChatMessage(toolCalls);
                             if(toolcallStr.Length > 0) //Add context text if it exists
@@ -75,7 +75,7 @@ namespace Debate_Library
                                 assistantMsg.Content.Add(ChatMessageContentPart.CreateTextPart(toolcallStr.ToString()));
                             }
 
-                            messages.Add(assistantMsg);
+                            messages.Add(assistantMsg); //Add tool call assistant message
 
                             // Add placeholder tool responses
                             foreach (var toolCall in toolCalls)
@@ -96,7 +96,7 @@ namespace Debate_Library
                             // Normal finish — done
                             if (sb.Length > (type.ToString() + ": ").Count())
                             {
-                                messages.Add(new UserChatMessage(sb.ToString()));
+                                messages.Add(new UserChatMessage(sb.ToString())); //Adding the full "user" chat message to the list
                             }
                             yield break;
                         }
