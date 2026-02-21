@@ -29,67 +29,86 @@ namespace Debate_Library
         {
             messages[0] = new SystemChatMessage(writeSystemMessage(type));
 
-            StringBuilder sb = new StringBuilder();
-            await foreach (StreamingChatCompletionUpdate update in sendRequestAsync())
-            {
-                foreach (ChatMessageContentPart part in update.ContentUpdate)
-                {
-                    if (part.Kind == ChatMessageContentPartKind.Text && !string.IsNullOrEmpty(part.Text))
-                    {
-                        foreach (char c in part.Text)
-                        {
-                            sb.Append(c);
-                            yield return c;
-                        }
-                    }
-                }
+            bool repeat;
 
+            do
+            {
+                repeat = false;
+                StringBuilder sb = new StringBuilder(type.ToString() + ": ");
+                StringBuilder toolcallStr = new StringBuilder();
                 var toolCallIndex = 0;
                 List<ChatToolCall> toolCalls = new List<ChatToolCall>();
                 var assistantMsg = new AssistantChatMessage("This is a placeholder");
-
-                foreach (var toolUpdate in update.ToolCallUpdates)
+                await foreach (StreamingChatCompletionUpdate update in sendRequestAsync())
                 {
-                    toolCallIndex = toolUpdate.Index;
-                    if (toolCalls.Count <= toolCallIndex)
+                    foreach (ChatMessageContentPart part in update.ContentUpdate)
                     {
-                        toolCalls.Add(ChatToolCall.CreateFunctionToolCall(toolUpdate.ToolCallId, toolUpdate.FunctionName, toolUpdate.FunctionArgumentsUpdate));
+                        if (part.Kind == ChatMessageContentPartKind.Text && !string.IsNullOrEmpty(part.Text) && toolCalls.Count == 0)
+                        {
+                            foreach (char c in part.Text)
+                            {
+                                sb.Append(c);
+                                yield return c;
+                            }
+                        }else if(toolCalls.Count > 0)
+                        {
+                            toolcallStr.Append(part.Text);
+                        }
+                    }
+
+                    foreach (var toolUpdate in update.ToolCallUpdates)
+                    {
+                        toolCallIndex = toolUpdate.Index;
+                        if (toolCalls.Count <= toolCallIndex)
+                        {
+                            toolCalls.Add(ChatToolCall.CreateFunctionToolCall(toolUpdate.ToolCallId, toolUpdate.FunctionName, toolUpdate.FunctionArgumentsUpdate));
+                        }
+                    }
+
+                    if (update.FinishReason.HasValue)
+                    {
+                        if (update.FinishReason.Value == ChatFinishReason.ToolCalls && toolCalls.Count > 0)
+                        {
+                            assistantMsg = new AssistantChatMessage(toolCalls);
+                            if(toolcallStr.Length > 0) //Add context text if it exists
+                            {
+                                assistantMsg.Content.Add(ChatMessageContentPart.CreateTextPart(toolcallStr.ToString()));
+                            }
+
+                            messages.Add(assistantMsg);
+
+                            // Add placeholder tool responses
+                            foreach (var toolCall in toolCalls)
+                            {
+                                messages.Add(new ToolChatMessage(toolCall.Id, "Search performed."));
+                            }
+
+                            toolCalls.Clear();
+                            toolCallIndex = 0;
+                            toolcallStr.Clear();
+
+                            // Break to start new request
+                            repeat = true;
+                            break;
+                        }
+                        else
+                        {
+                            // Normal finish — done
+                            if (sb.Length > (type.ToString() + ": ").Count())
+                            {
+                                messages.Add(new UserChatMessage(sb.ToString()));
+                            }
+                            yield break;
+                        }
                     }
                 }
-
-                if (update.FinishReason.HasValue)
-                {
-                    if (update.FinishReason.Value == ChatFinishReason.ToolCalls && toolCalls.Count > 0)
-                    {
-                        assistantMsg = new AssistantChatMessage(toolCalls);
-                        messages.Add(assistantMsg);
-
-                        // Add placeholder tool responses (empty for xAI built-in tools)
-                        foreach (var toolCall in assistantMsg.ToolCalls)
-                        {
-                            messages.Add(new ToolChatMessage(toolCall.Id, "{}"));
-                        }
-
-                        // Break to start new request
-                        break;
-                    }
-                    else
-                    {
-                        // Normal finish — done
-                        if (sb.Length > 0)
-                        {
-                            messages.Add(new UserChatMessage(sb.ToString()));
-                        }
-                        yield break;
-                    }
-                }
-            }
+            } while (repeat);
         }
 
         //Private methods
         private string writeSystemMessage(MbtiType type)
         {
-            return "You are a " + type.ToString() + " personality type.  A description of you is this: " + MbtiDescriptions[type] + "  You are in a debate with other personality types.  You may call them out by name and respond to points.  You don't need to call out every other type that has spoken and you do not have to respond to every point.  Pick the most important points.  Only call out the other types if it's important and do it in the third person.  Your job right now is to respond to the messages as your type (without saying explicitly what your type is).  Prioritize the last message for your response and keep in mind the message labeled as the debate topic.  Do not go off topic.  Keep response to 100 tokens or less.";
+            return "You are a " + type.ToString() + " personality type.  A description of you is this: " + MbtiDescriptions[type] + "  You are in a debate with other personality types.  You may call them out by name and respond to points.  Each user message response from another type should start with their type and a colon.  You don't need to call out every other type that has spoken and you do not have to respond to every point.  Pick the most important points.  Only call out the other types if it's important and do it in the third person.  Your job right now is to respond to the user messages as your type (without saying explicitly what your type is).  Prioritize the last user message for your response and keep in mind the user message labeled as the debate topic.  Do not go off topic.  Keep response to 100 tokens or less.";
         }
     }
 }

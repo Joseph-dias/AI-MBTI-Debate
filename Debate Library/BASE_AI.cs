@@ -1,4 +1,5 @@
 ﻿using OpenAI;
+using OpenAI.Assistants;
 using OpenAI.Chat;
 using OpenAI.Responses;
 using System.ClientModel;
