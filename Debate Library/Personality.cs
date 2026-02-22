@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Debate_Library
 {
-    public static class MBTI
+    public static class Personality
     {
         public enum MbtiType
         {
@@ -46,6 +46,93 @@ namespace Debate_Library
             { MbtiType.ESFJ, "Warmhearted, conscientious, and cooperative. Want harmony in their environment and work with determination to establish it. Loyal, notice others' needs, and provide practical care." },
             { MbtiType.ENFJ, "Warm, empathetic, responsive, and responsible. Highly attuned to others' emotions and needs. Provide inspiring leadership and facilitate growth in people and groups." },
             { MbtiType.ENTJ, "Frank, decisive, assume leadership readily. See inefficiencies quickly and devise systems to solve problems. Enjoy long-term planning and forceful implementation of goals." }
+        };
+
+        public enum Trait
+        {
+            Adaptable, 
+            Adventurous, 
+            Affectionate, 
+            Ambitious, 
+            Analytical, 
+            Calm, 
+            Charismatic, 
+            Compassionate, 
+            Confident, 
+            Conscientious, 
+            Cooperative, 
+            Courageous, 
+            Creative, 
+            Curious, 
+            Decisive, 
+            Empathetic, 
+            Enthusiastic, 
+            Friendly, 
+            Generous, 
+            Gentle, 
+            Honest, 
+            Humble, 
+            Imaginative, 
+            Independent, 
+            Industrious, 
+            Loyal, 
+            Mature, 
+            Optimistic, 
+            Organized, 
+            Patient, 
+            Proactive, 
+            Reliable, 
+            Resilient, 
+            Resourceful, 
+            Thoughtful,
+            Aggressive, 
+            Aloof,
+            Arrogant, 
+            Boisterous, 
+            Callous, 
+            Cautious, 
+            Clumsy, 
+            Cowardly, 
+            Cynical, 
+            Deceptive, 
+            Domineering, 
+            Fickle, 
+            Frivolous, 
+            Grim, 
+            Gullible, 
+            Impatient, 
+            Impulsive, 
+            Impudent, 
+            Insecure, 
+            Irresponsible, 
+            Moody, 
+            Narcissistic, 
+            Obnoxious, 
+            Passive, 
+            Pessimistic, 
+            Reckless, 
+            Rigid, 
+            Selfish, 
+            Timid, 
+            Vain
+        }
+
+        public enum Vocation
+        {
+            Doctor,
+            Teacher,
+            Programmer,
+            Artist,
+            Miner
+        }
+
+        public static readonly List<string> Experiences = new()
+        {
+            "Someone who has lived through a disaster or personal loss. They approach life with hyper-vigilance, high resilience, and a \"prepare for the worst\" mindset.",
+            "Someone who grew up with security. They approach things with high confidence and entitlement, but may lack practical \"street smarts\" or empathy for struggle.",
+            "Someone who grew up in a culture or group where they didn't belong. They approach situations as observers, often picking up on social nuances others miss.",
+            "Someone who had to look after others young (e.g., a \"parentified\" child). They approach problems with nurturing instincts and a high sense of duty.",
+            "Someone who never stayed in one place. They have high adaptability but might struggle with commitment or long-term planning."
         };
     }
 }
