@@ -25,16 +25,16 @@ namespace Debate_Library
             messages.Add(new UserChatMessage("Debate Topic: " + topic)); //Setting the topic
         }
 
-        public async IAsyncEnumerable<char> getDebateResponse(MbtiType type)
+        public async IAsyncEnumerable<char> getDebateResponse(Persona person)
         {
-            messages[0] = new SystemChatMessage(writeDebaterSystemMessage(type));
+            messages[0] = new SystemChatMessage(writeDebaterSystemMessage(person));
 
             bool repeat;
 
             do
             {
                 repeat = false;
-                StringBuilder sb = new StringBuilder(type.ToString() + ": ");
+                StringBuilder sb = new StringBuilder(person.Name + " (" + person.personality + "): ");
                 StringBuilder toolcallStr = new StringBuilder(); //Building a tool call string if the tool call needs it
                 var toolCallIndex = 0;
                 List<ChatToolCall> toolCalls = new List<ChatToolCall>(); //Creating list of tool calls to send to the API if necessary
@@ -94,7 +94,7 @@ namespace Debate_Library
                         else
                         {
                             // Normal finish — done
-                            if (sb.Length > (type.ToString() + ": ").Count())
+                            if (sb.Length > (person.Name + " (" + person.personality + "): ").Count())
                             {
                                 messages.Add(new UserChatMessage(sb.ToString())); //Adding the full "user" chat message to the list
                             }
@@ -106,9 +106,9 @@ namespace Debate_Library
         }
 
         //Private methods
-        private string writeDebaterSystemMessage(MbtiType type)
+        private string writeDebaterSystemMessage(Persona person)
         {
-            return "You are a " + type.ToString() + " personality type.  A description of you is this: " + MbtiDescriptions[type] + "  You are in a debate with other personality types.  You may call them out by name and respond to points.  Each user message response from another type should start with their type and a colon.  You don't need to call out every other type that has spoken and you do not have to respond to every point.  Pick the most important points.  Only call out the other types if it's important and do it in the third person.  Your job right now is to respond to the user messages as your type (without saying explicitly what your type is).  Prioritize the last user message for your response and keep in mind the user message labeled as the debate topic.  Do not go off topic.  Keep response to 100 tokens or less.";
+            return $"You are a {person.personality} personality type named {person.Name}.  A description of you is this: {MbtiDescriptions[person.personality]}. Your career is this: {person.job}.  Here is a list of your other personality traits: {string.Join(",", person.traits.Select(t => t.ToString()))}.  Here's a description your past experience: {person.experiences}.  Use all of that to inform your response without explicitly saying any of it.  You are in a debate with other people.  You may call them out by name and respond to points.  Each user message response from another person should start with their name, their personality type in parentheses, and a colon.  If you've been called out by name, you should prioritize responding to them unless you already have, and you should respond to other people by calling them out in the third person.  You don't need to call out every other person that has spoken and you do not have to respond to every point.  Pick the most important points.  Only call out the other people if it's important and necessary and you're directly responding to what they said and do it in the third person.  Your job right now is to respond to the user messages based on your individual characteristics (without saying explicitly that's what you're doing).  Prioritize the last user message for your response unless you've been called out and keep in mind the user message labeled as the debate topic.  Do not go off topic.  Keep response to 100 tokens or less.  When calling out people or when being called out, only refer to names.  Not the type in parentheses after the name.";
         }
     }
 }

@@ -9,15 +9,27 @@ namespace Debate_Library
 {
     public class Persona
     {
+        public string? Name { get; private set; }
         public MbtiType personality { get; set; }
         public List<Trait> traits { get; private set; }
         public Vocation job { get; set; }
+        public string experiences { get; set; }
 
-        public Persona(MbtiType personality, List<Trait> traits, Vocation job)
+        private Persona(MbtiType personality, List<Trait> traits, Vocation job, string experiences)
         {
             this.personality = personality;
             this.traits = traits;
             this.job = job;
+            this.experiences = experiences;
+        }
+
+        public async static Task<Persona> CreatePerson(string AIModel, MbtiType personality, List<Trait> traits, Vocation job, string experiences)
+        {
+            Persona persona = new Persona(personality, traits, job, experiences);
+
+            persona.Name = await AINamer.getInstance(AIModel).getName(persona) ?? throw new IOException("Couldn't get a name");
+
+            return persona;
         }
     }
 }

@@ -2,7 +2,11 @@
 
 using Debate_Library;
 
-AIDebateHandler handler = new AIDebateHandler("grok-4-fast-reasoning");
+string model = "grok-4-fast-reasoning";
+
+AIDebateHandler handler = new AIDebateHandler(model);
+
+IPersonFactory personFactory = new PersonFactory();
 
 Console.Write("What's the debate topic?: ");
 
@@ -12,10 +16,9 @@ List<Personality.MbtiType> spokenTypes = new List<Personality.MbtiType>();
 
 for (int x = 0; x < 5; x++)
 {
-    Personality.MbtiType type = RandomMBTI.ChooseFromExcluding(spokenTypes);
-    spokenTypes.Add(type);
-    Console.Write(type.ToString() + ": ");
-    await foreach (char c in handler.getDebateResponse(type))
+    Persona person = await personFactory.CreatePerson(model);
+    Console.Write(person.Name + " (" + person.personality + "): ");
+    await foreach (char c in handler.getDebateResponse(person))
     {
         Console.Write(c);
     }

@@ -31,6 +31,15 @@ namespace Debate_Library
         }
 
         /// <summary>
+        /// Sends the messages and returns the response in one chunk
+        /// </summary>
+        /// <returns></returns>
+        protected async Task<ChatCompletion> sendRequestAsync()
+        {
+            return await client.GetChatClient(model).CompleteChatAsync(messages);
+        }
+
+        /// <summary>
         /// Sends the messages to the API and streams back the response
         /// </summary>
         /// <returns></returns>
