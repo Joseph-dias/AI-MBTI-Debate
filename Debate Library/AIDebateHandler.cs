@@ -39,7 +39,7 @@ namespace Debate_Library
                 var toolCallIndex = 0;
                 List<ChatToolCall> toolCalls = new List<ChatToolCall>(); //Creating list of tool calls to send to the API if necessary
                 var assistantMsg = new AssistantChatMessage("This is a placeholder");
-                await foreach (StreamingChatCompletionUpdate update in sendStreamingRequestAsync())
+                await foreach (StreamingChatCompletionUpdate update in sendStreamingRequestWithWebSearchAsync())
                 {
                     foreach (ChatMessageContentPart part in update.ContentUpdate)
                     {
@@ -105,10 +105,38 @@ namespace Debate_Library
             } while (repeat);
         }
 
+        public async IAsyncEnumerable<char> getSummaryResponse()
+        {
+            messages[0] = new SystemChatMessage(writeSummarySystemMessage());
+            await foreach (StreamingChatCompletionUpdate update in sendStreamingRequestWithoutToolsAsync())
+            {
+                foreach (ChatMessageContentPart part in update.ContentUpdate)
+                {
+                    if (part.Kind == ChatMessageContentPartKind.Text && !string.IsNullOrEmpty(part.Text))
+                    {
+                        foreach (char c in part.Text)
+                        {
+                            yield return c;
+                        }
+                    }
+                }
+
+                if (update.FinishReason.HasValue)
+                {
+                    yield break;
+                }
+            }
+        }
+
         //Private methods
         private string writeDebaterSystemMessage(Persona person)
         {
-            return $"You are a {person.personality} personality type named {person.Name}.  A description of you is this: {MbtiDescriptions[person.personality]}. Your career is this: {person.job}.  Here is a list of your other personality traits: {string.Join(",", person.traits.Select(t => t.ToString()))}.  Here's a description your past experience: {person.experiences}.  Use all of that to inform your response without explicitly saying any of it.  You are in a debate with other people.  You may call them out by name and respond to points.  Each user message response from another person should start with their name, their personality type in parentheses, and a colon.  If you've been called out by name, you should prioritize responding to them unless you already have, and you should respond to other people by calling them out in the third person.  You don't need to call out every other person that has spoken and you do not have to respond to every point.  Pick the most important points.  Only call out the other people if it's important and necessary and you're directly responding to what they said and do it in the third person.  Your job right now is to respond to the user messages based on your individual characteristics (without saying explicitly that's what you're doing).  Prioritize the last user message for your response unless you've been called out and keep in mind the user message labeled as the debate topic.  Do not go off topic.  Keep response to 100 tokens or less.  When calling out people or when being called out, only refer to names.  Not the type in parentheses after the name.";
+            return $"You are a {person.personality} personality type named {person.Name}.  A description of you is this: {MbtiDescriptions[person.personality]}. Your career is this: {person.job}.  Here is a list of your other personality traits: {string.Join(",", person.traits.Select(t => t.ToString()))}.  Here's a description your past experience: {person.experiences}.  Use all of that to inform your response without explicitly saying any of it.  You are in a debate with other people.  You may call them out by name and respond to points.  Each user message response from another person should start with their name, their personality type in parentheses, and a colon.  You should not start a response with your name, your personality type in parentheses, and a colon.  If you've been called out by name (your name is {person.Name}), you should prioritize responding to them unless you already have, and you should respond to other people by calling them out in the third person.  You don't need to call out every other person that has spoken and you do not have to respond to every point.  Pick the most important points.  Only call out the other people if it's important and necessary and you're directly responding to what they said and do it in the third person.  Your job right now is to respond to the user messages based on your individual characteristics (without saying explicitly that's what you're doing).  Prioritize the last user message for your response unless you've been called out and keep in mind the user message labeled as the debate topic.  Do not go off topic.  Keep response to 100 tokens or less.  When calling out people or when being called out, only refer to names.  Not the type in parentheses after the name.";
+        }
+
+        private string writeSummarySystemMessage()
+        {
+            return $"You are the moderator of this debate.  You have no opinion on the topic nor commentary.  Your job is to summarize what has been discussed by the various people.  Take each user response that starts with their name, they personality, and a colon.  Then take the debate topic.  Decide the main two or three opinions.  Summarize those opinions and list the people who agree with that opinion (first name only, not their type), include one sentence on what each person's main point was.  Use a maximum of 500 tokens.  But fewer tokens is preferrable.";
         }
     }
 }

@@ -43,7 +43,7 @@ namespace Debate_Library
         /// Sends the messages to the API and streams back the response
         /// </summary>
         /// <returns></returns>
-        protected async IAsyncEnumerable<StreamingChatCompletionUpdate> sendStreamingRequestAsync()
+        protected async IAsyncEnumerable<StreamingChatCompletionUpdate> sendStreamingRequestWithWebSearchAsync()
         {
             var options = new ChatCompletionOptions()
             {
@@ -54,6 +54,23 @@ namespace Debate_Library
             options.ToolChoice = ChatToolChoice.CreateAutoChoice();
 
             await foreach (StreamingChatCompletionUpdate update in client.GetChatClient(model).CompleteChatStreamingAsync(messages, options))
+            {
+                yield return update;
+            }
+        }
+
+        /// <summary>
+        /// Sends the messages to the API and streams back the response
+        /// </summary>
+        /// <returns></returns>
+        protected async IAsyncEnumerable<StreamingChatCompletionUpdate> sendStreamingRequestWithoutToolsAsync()
+        {
+            var options = new ChatCompletionOptions()
+            {
+                MaxOutputTokenCount = 500
+            };
+
+            await foreach (StreamingChatCompletionUpdate update in client.GetChatClient(model).CompleteChatStreamingAsync(messages))
             {
                 yield return update;
             }

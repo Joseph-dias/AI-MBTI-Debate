@@ -55,6 +55,7 @@ namespace Debate_Library
             Affectionate, 
             Ambitious, 
             Analytical, 
+            Antagonistic,
             Calm, 
             Charismatic, 
             Compassionate, 
@@ -62,6 +63,8 @@ namespace Debate_Library
             Conscientious, 
             Cooperative, 
             Courageous, 
+            Conservative,
+            MAGA,
             Creative, 
             Curious, 
             Decisive, 
@@ -76,11 +79,13 @@ namespace Debate_Library
             Independent, 
             Industrious, 
             Loyal, 
+            Leftist,
             Mature, 
             Optimistic, 
             Organized, 
             Patient, 
             Proactive, 
+            Political,
             Reliable, 
             Resilient, 
             Resourceful, 
@@ -112,9 +117,13 @@ namespace Debate_Library
             Pessimistic, 
             Reckless, 
             Rigid, 
+            Right_Leaning,
             Selfish, 
             Timid, 
-            Vain
+            Vain,
+            Progressive,
+            Young_Earth,
+            Evolutionist
         }
 
         public enum Vocation
@@ -123,7 +132,13 @@ namespace Debate_Library
             Teacher,
             Programmer,
             Artist,
-            Miner
+            Miner,
+            Scientist,
+            Geologist,
+            Historian,
+            Evangelical_Pastor,
+            Catholic_Priest,
+            Buddhist_Monk
         }
 
         public static readonly List<string> Experiences = new()
@@ -132,7 +147,8 @@ namespace Debate_Library
             "Someone who grew up with security. They approach things with high confidence and entitlement, but may lack practical \"street smarts\" or empathy for struggle.",
             "Someone who grew up in a culture or group where they didn't belong. They approach situations as observers, often picking up on social nuances others miss.",
             "Someone who had to look after others young (e.g., a \"parentified\" child). They approach problems with nurturing instincts and a high sense of duty.",
-            "Someone who never stayed in one place. They have high adaptability but might struggle with commitment or long-term planning."
+            "Someone who never stayed in one place. They have high adaptability but might struggle with commitment or long-term planning.",
+            "Someone who's parents disowned them when they were a young adult because of their beliefs.  They have had to look after themselves ever since.  As a result, they trust no one."
         };
     }
 }
