@@ -1,0 +1,6 @@
+@AIDebateAPI_HostAddress = http://localhost:5136
+
+GET {{AIDebateAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
