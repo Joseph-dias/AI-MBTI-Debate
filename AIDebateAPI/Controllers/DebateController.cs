@@ -8,7 +8,7 @@ using static AIDebateAPI.SignalR.SendChunk;
 
 namespace AIDebateAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class DebateController : ControllerBase
     {
@@ -54,9 +54,12 @@ namespace AIDebateAPI.Controllers
             while (finishedDebaters.Count() < info.People.people.Count())
             {
                 Persona person = spoken.Keys.ToList()[_random.Next(spoken.Count)];
+                bool nextSpeaker = true;
                 await foreach (char c in _handler.getDebateResponse(person))
                 {
-                    await Send(_hubContext, debateId, person.Name ?? string.Empty, person.personality.ToString(), c.ToString());
+                    await Send(_hubContext, debateId, person.Name ?? string.Empty, person.personality.ToString(), c.ToString(), nextSpeaker);
+                    if(nextSpeaker)
+                        nextSpeaker = false;
                 }
                 spoken[person]++;
                 if (spoken[person] > 2)

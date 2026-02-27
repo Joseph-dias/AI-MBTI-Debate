@@ -1,54 +1,76 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using AIDebateAPI.DTO;
 using Debate_Library;
+using System.Text;
+using System.Text.Json;
 using static System.Random;
 
-string model = "grok-4-fast-reasoning";
-Random rand = new Random();
-
-AIDebateHandler handler = new AIDebateHandler(model);
-
-Console.Write("Loading... (Please Wait)");
-
-IPersonFactory personFactory = new PersonFactory();
-List<Persona> people = await personFactory.CreatePeople(model, 5);
-Dictionary<Persona, int> spoken = people.ToDictionary(p => p, p => 0);
-
-List<Persona> finishedDebaters = new List<Persona>();
-
-Console.Clear();
-
-
-
-Console.Write("What's the debate topic?: ");
-
-handler.setTopic(Console.ReadLine());
-
-List<Personality.MbtiType> spokenTypes = new List<Personality.MbtiType>();
-
-while(people.Count > 0)
+HttpClient client = new HttpClient
 {
-    Persona person = people[rand.Next(people.Count)];
-    Console.Write(person.Name + " (" + person.personality + "): ");
-    await foreach (char c in handler.getDebateResponse(person))
-    {
-        Console.Write(c);
-    }
-    spoken[person]++;
-    if (spoken[person] > 2)
-    {
-        spoken.Remove(person);
-        people.Remove(person);
-        finishedDebaters.Add(person);
-    }
-    Console.WriteLine();
-    Console.WriteLine();
+    BaseAddress = new Uri("https://localhost:7139/")
+};
+
+JsonSerializerOptions options = new JsonSerializerOptions
+{
+    PropertyNameCaseInsensitive = true
+};
+
+//Generating the people
+
+var response = await client.PostAsync($"People/Generate/5", null);
+
+if (!response.IsSuccessStatusCode)
+{
+    Console.WriteLine($"Generate failed: {response.StatusCode}");
+    throw new Exception($"Failed to generate people: {response.StatusCode}");
 }
 
-//Summarize the debate
-await foreach (char c in handler.getSummaryResponse())
+var json = await response.Content.ReadAsStringAsync();
+PeopleDTO? results = JsonSerializer.Deserialize<PeopleDTO>(json, options);
+
+if (results == null || results.people == null || results.people.Count == 0)
 {
-    Console.Write(c);
+    Console.WriteLine("No people generated.");
+    throw new Exception("No people generated.");
+}else
+{
+    Console.WriteLine("Generated People:");
+    foreach (var person in results.people)
+    {
+        Console.WriteLine($"Name: {person.Name}, Personality: {person.personality}");
+    }
 }
 
-Console.ReadLine();
+//Starting the debate
+
+Console.Write("Enter a debate topic: ");
+
+var request = new StartDebateDTO
+{
+    Topic = Console.ReadLine(),
+    People = results
+};
+
+var jsonDebate = JsonSerializer.Serialize(request);
+var content = new StringContent(jsonDebate, Encoding.UTF8, "application/json");
+
+var responseDebate = await client.PostAsync("Debate/start", content);
+
+if (!responseDebate.IsSuccessStatusCode)
+{
+    Console.WriteLine($"Start debate failed: {responseDebate.StatusCode}");
+    var error = await responseDebate.Content.ReadAsStringAsync();
+    Console.WriteLine(error);
+    return;
+}
+
+var resultJson = await responseDebate.Content.ReadAsStringAsync();
+var result = JsonSerializer.Deserialize<Dictionary<string, string>>(resultJson);
+
+if (result?.TryGetValue("debateId", out var debateId) == true)
+{
+    Console.WriteLine($"Debate started! Debate ID = {debateId}");
+}
+
+Console.Read();
