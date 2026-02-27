@@ -13,7 +13,10 @@ builder.Services.AddSignalR();
 //Injection
 builder.Services.AddScoped<IPersonFactory, PersonFactory>();
 builder.Services.AddScoped<Random, Random>();
-builder.Services.AddScoped<AIDebateHandler, AIDebateHandler>();
+builder.Services.AddScoped(sp =>
+{
+    return new AIDebateHandler(BASE_AI.MODEL);
+});
 
 var app = builder.Build();
 

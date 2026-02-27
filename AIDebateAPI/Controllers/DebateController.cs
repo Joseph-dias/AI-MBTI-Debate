@@ -47,7 +47,7 @@ namespace AIDebateAPI.Controllers
         private async Task debate(string debateId, StartDebateDTO info)
         {
 
-            Dictionary<Persona, int> spoken = info.People.people.ToDictionary(p => p, p => 0);
+            Dictionary<Persona, int> spoken = (await Task.WhenAll((info.People.people).Select(p => PersonaDTO.CreatePersona(p)))).ToDictionary(p => p, p => 0);
 
             List<Persona> finishedDebaters = new List<Persona>();
 

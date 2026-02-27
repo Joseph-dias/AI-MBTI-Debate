@@ -28,7 +28,8 @@ namespace AIDebateAPI.Controllers
 
             try
             {
-                PeopleDTO.people = await _personFactory.CreatePeople(BASE_AI.MODEL, num) ?? new(); //Attempting to create people
+                List<Persona> people = await _personFactory.CreatePeople(BASE_AI.MODEL, num) ?? new();
+                PeopleDTO.people = people != null ? (await Task.WhenAll(people.Select(p => PersonaDTO.CreateDTO(p)))).ToList() : new(); //Attempting to create people
             }
             catch (Exception)
             {

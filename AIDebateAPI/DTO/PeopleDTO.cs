@@ -4,6 +4,6 @@ namespace AIDebateAPI.DTO
 {
     public class PeopleDTO
     {
-        public List<Persona> people { get; set; } = new();
+        public List<PersonaDTO> people { get; set; } = new();
     }
 }
