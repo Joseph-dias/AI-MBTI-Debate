@@ -1,14 +1,19 @@
 using AIDebateAPI.SignalR;
+using Debate_Library;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
+
+//Injection
+builder.Services.AddScoped<IPersonFactory, PersonFactory>();
+builder.Services.AddScoped<Random, Random>();
+builder.Services.AddScoped<AIDebateHandler, AIDebateHandler>();
 
 var app = builder.Build();
 

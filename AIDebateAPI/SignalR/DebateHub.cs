@@ -13,6 +13,7 @@ namespace AIDebateAPI.SignalR
         public async Task StopDebate(string debateId)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, debateId);
+            await Clients.Group(debateId).SendAsync("DebateStarted", debateId);
         }
     }
 }

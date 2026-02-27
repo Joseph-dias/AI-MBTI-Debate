@@ -1,8 +1,10 @@
 ﻿using AIDebateAPI.DTO;
 using AIDebateAPI.SignalR;
+using Debate_Library;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using static AIDebateAPI.SignalR.SendChunk;
 
 namespace AIDebateAPI.Controllers
 {
@@ -11,10 +13,14 @@ namespace AIDebateAPI.Controllers
     public class DebateController : ControllerBase
     {
         private readonly IHubContext<DebateHub> _hubContext;
+        private readonly Random _random;
+        private readonly AIDebateHandler _handler;
 
-        public DebateController(IHubContext<DebateHub> hubContext)
+        public DebateController(IHubContext<DebateHub> hubContext, AIDebateHandler handler, Random rand)
         {
             _hubContext = hubContext;
+            _handler = handler;
+            _random = rand;
         }
 
         [HttpPost("start")]
@@ -22,6 +28,8 @@ namespace AIDebateAPI.Controllers
         {
             if (string.IsNullOrWhiteSpace(request.Topic))
                 return BadRequest("Topic is required");
+            if ((request.People?.people) == null || request.People.people.Count == 0)
+                return BadRequest("People are required.  Please call 'People/Generate' first.");
 
             string debateId = Guid.NewGuid().ToString("N")[..16];
 
@@ -31,7 +39,32 @@ namespace AIDebateAPI.Controllers
                 topic = request.Topic
             });
 
+            _ = debate(debateId, request);
+
             return Ok(new { debateId });
+        }
+
+        private async Task debate(string debateId, StartDebateDTO info)
+        {
+
+            Dictionary<Persona, int> spoken = info.People.people.ToDictionary(p => p, p => 0);
+
+            List<Persona> finishedDebaters = new List<Persona>();
+
+            while (finishedDebaters.Count() < info.People.people.Count())
+            {
+                Persona person = spoken.Keys.ToList()[_random.Next(spoken.Count)];
+                await foreach (char c in _handler.getDebateResponse(person))
+                {
+                    await Send(_hubContext, debateId, person.Name ?? string.Empty, person.personality.ToString(), c.ToString());
+                }
+                spoken[person]++;
+                if (spoken[person] > 2)
+                {
+                    spoken.Remove(person);
+                    finishedDebaters.Add(person);
+                }
+            }
         }
     }
 }

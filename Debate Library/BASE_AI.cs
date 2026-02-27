@@ -9,6 +9,8 @@ namespace Debate_Library
 {
     public abstract class BASE_AI
     {
+        public static string MODEL = "grok-4-fast-reasoning";
+
         private string? apiKey;
         protected OpenAIClient client;
         protected string model;
