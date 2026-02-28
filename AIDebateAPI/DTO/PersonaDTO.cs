@@ -11,9 +11,9 @@ namespace AIDebateAPI.DTO
         public string job { get; set; } = string.Empty;
         public string experiences { get; set; } = string.Empty;
 
-        public static async Task<Persona> CreatePersona(PersonaDTO persona)
+        public static Persona CreatePersona(PersonaDTO persona)
         {
-            return await Persona.CreatePerson(BASE_AI.MODEL, (MbtiType)Enum.Parse(typeof(MbtiType), persona.personality), persona.traits.Select(t => (Trait)Enum.Parse(typeof(Trait), t)).ToList(), (Vocation)Enum.Parse(typeof(Vocation), persona.job), persona.experiences);
+            return Persona.CreatePersonWithName(persona.Name, (MbtiType)Enum.Parse(typeof(MbtiType), persona.personality), persona.traits.Select(t => (Trait)Enum.Parse(typeof(Trait), t)).ToList(), (Vocation)Enum.Parse(typeof(Vocation), persona.job), persona.experiences);
         }
 
         public static async Task<PersonaDTO> CreateDTO(Persona persona)

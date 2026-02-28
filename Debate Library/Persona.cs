@@ -31,5 +31,14 @@ namespace Debate_Library
 
             return persona;
         }
+
+        public static Persona CreatePersonWithName(string name, MbtiType personality, List<Trait> traits, Vocation job, string experiences)
+        {
+            Persona persona = new Persona(personality, traits, job, experiences);
+
+            persona.Name = name;
+
+            return persona;
+        }
     }
 }

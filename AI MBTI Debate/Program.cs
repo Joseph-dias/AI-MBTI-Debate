@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using AI_MBTI_Debate;
 using AIDebateAPI.DTO;
 using Debate_Library;
 using System.Text;
@@ -68,9 +69,11 @@ if (!responseDebate.IsSuccessStatusCode)
 var resultJson = await responseDebate.Content.ReadAsStringAsync();
 var result = JsonSerializer.Deserialize<Dictionary<string, string>>(resultJson);
 
-if (result?.TryGetValue("debateId", out var debateId) == true)
+string? debateId = null;
+
+if (result?.TryGetValue("debateId", out debateId) == true)
 {
     Console.WriteLine($"Debate started! Debate ID = {debateId}");
 }
 
-Console.Read();
+await ConnectToSignalR.Listen(debateId ?? string.Empty);

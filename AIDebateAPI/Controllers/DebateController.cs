@@ -14,12 +14,10 @@ namespace AIDebateAPI.Controllers
     {
         private readonly IHubContext<DebateHub> _hubContext;
         private readonly Random _random;
-        private readonly AIDebateHandler _handler;
 
-        public DebateController(IHubContext<DebateHub> hubContext, AIDebateHandler handler, Random rand)
+        public DebateController(IHubContext<DebateHub> hubContext, Random rand)
         {
             _hubContext = hubContext;
-            _handler = handler;
             _random = rand;
         }
 
@@ -33,21 +31,24 @@ namespace AIDebateAPI.Controllers
 
             string debateId = Guid.NewGuid().ToString("N")[..16];
 
+            AIDebateHandler _handler = new AIDebateHandler(BASE_AI.MODEL);
+            _handler.setTopic(request.Topic);
+
             await _hubContext.Clients.Group(debateId).SendAsync("DebateStarted", new
             {
                 debateId,
                 topic = request.Topic
             });
 
-            _ = debate(debateId, request);
+            _ = debate(debateId, request, _handler);
 
             return Ok(new { debateId });
         }
 
-        private async Task debate(string debateId, StartDebateDTO info)
+        private async Task debate(string debateId, StartDebateDTO info, AIDebateHandler _handler)
         {
-
-            Dictionary<Persona, int> spoken = (await Task.WhenAll((info.People.people).Select(p => PersonaDTO.CreatePersona(p)))).ToDictionary(p => p, p => 0);
+            Task.Delay(7000).Wait(); // wait for clients to connect to the hub
+            Dictionary<Persona, int> spoken = info.People.people.Select(p => PersonaDTO.CreatePersona(p)).ToDictionary(p => p, p => 0);
 
             List<Persona> finishedDebaters = new List<Persona>();
 
