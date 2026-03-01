@@ -25,8 +25,13 @@ namespace AI_MBTI_Debate
                     string type = elem.TryGetProperty("type", out var t) ? t.GetString() ?? "" : "";
                     string content = elem.TryGetProperty("content", out var c) ? c.GetString() ?? "" : "";
                     bool changeSpeaker = elem.TryGetProperty("changeSpeaker", out var cs) && cs.ValueKind == System.Text.Json.JsonValueKind.True;
+                    bool summary = elem.TryGetProperty("summary", out var s) && s.ValueKind == System.Text.Json.JsonValueKind.True;
 
-                    if (changeSpeaker)
+                    if (summary && changeSpeaker)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine();
+                    }else if (changeSpeaker)
                     {
                         Console.WriteLine();
                         Console.WriteLine();

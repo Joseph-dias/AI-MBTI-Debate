@@ -33,5 +33,15 @@ namespace Debate_Library
 
             return response?.Content[0]?.Text;
         }
+
+        public async Task<string?> getName()
+        {
+            string systemMessage = "You are tasked with giving a name to a character.  Your job is to respond with a name and a name only.  No other data.  First name only.";
+            messages.Clear();
+            messages.Add(new SystemChatMessage(systemMessage));
+            var response = await sendRequestAsync();
+
+            return response?.Content[0]?.Text;
+        }
     }
 }

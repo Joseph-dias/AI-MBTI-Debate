@@ -4,6 +4,7 @@ using Debate_Library;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using System;
 using static AIDebateAPI.SignalR.SendChunk;
 
 namespace AIDebateAPI.Controllers
@@ -58,7 +59,7 @@ namespace AIDebateAPI.Controllers
                 bool nextSpeaker = true;
                 await foreach (char c in _handler.getDebateResponse(person))
                 {
-                    await Send(_hubContext, debateId, person.Name ?? string.Empty, person.personality.ToString(), c.ToString(), nextSpeaker);
+                    await Send(_hubContext, debateId, person.Name ?? string.Empty, person.personality.ToString(), c.ToString(), nextSpeaker, false);
                     if(nextSpeaker)
                         nextSpeaker = false;
                 }
@@ -68,6 +69,15 @@ namespace AIDebateAPI.Controllers
                     spoken.Remove(person);
                     finishedDebaters.Add(person);
                 }
+            }
+
+
+            bool first = true;
+            await foreach (char c in _handler.getSummaryResponse())
+            {
+                await Send(_hubContext, debateId, string.Empty, string.Empty, c.ToString(), first, true);
+                if (first)
+                    first = false;
             }
         }
     }
