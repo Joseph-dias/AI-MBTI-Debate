@@ -85,6 +85,8 @@ namespace AIDebateAPI.Controllers
             }
             catch (Exception ex)
             {
+                //LOG ERROR HERE
+
                 await _hubContext.Clients.Group(debateId).SendAsync("DebateError", new
                 {
                     debateId,
