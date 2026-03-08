@@ -48,36 +48,50 @@ namespace AIDebateAPI.Controllers
 
         private async Task debate(string debateId, StartDebateDTO info, AIDebateHandler _handler)
         {
-            Task.Delay(7000).Wait(); // wait for clients to connect to the hub
-            Dictionary<Persona, int> spoken = info.People.people.Select(p => PersonaDTO.CreatePersona(p)).ToDictionary(p => p, p => 0);
-
-            List<Persona> finishedDebaters = new List<Persona>();
-
-            while (finishedDebaters.Count() < info.People.people.Count())
+            try
             {
-                Persona person = spoken.Keys.ToList()[_random.Next(spoken.Count)];
-                bool nextSpeaker = true;
-                await foreach (char c in _handler.getDebateResponse(person))
+                Task.Delay(7000).Wait(); // wait for clients to connect to the hub
+                Dictionary<Persona, int> spoken = info.People.people.Select(p => PersonaDTO.CreatePersona(p)).ToDictionary(p => p, p => 0);
+
+                List<Persona> finishedDebaters = new List<Persona>();
+
+                while (finishedDebaters.Count() < info.People.people.Count())
                 {
-                    await Send(_hubContext, debateId, person.Name ?? string.Empty, person.personality.ToString(), c.ToString(), nextSpeaker, false);
-                    if(nextSpeaker)
-                        nextSpeaker = false;
+                    Persona person = spoken.Keys.ToList()[_random.Next(spoken.Count)];
+                    bool nextSpeaker = true;
+                    await foreach (char c in _handler.getDebateResponse(person))
+                    {
+                        await Send(_hubContext, debateId, person.Name ?? string.Empty, person.personality.ToString(), c.ToString(), nextSpeaker, false);
+                        if (nextSpeaker)
+                            nextSpeaker = false;
+                    }
+                    spoken[person]++;
+                    if (spoken[person] > 2)
+                    {
+                        spoken.Remove(person);
+                        finishedDebaters.Add(person);
+                    }
                 }
-                spoken[person]++;
-                if (spoken[person] > 2)
+
+
+                bool first = true;
+                await foreach (char c in _handler.getSummaryResponse())
                 {
-                    spoken.Remove(person);
-                    finishedDebaters.Add(person);
+                    await Send(_hubContext, debateId, string.Empty, string.Empty, c.ToString(), first, true);
+                    if (first)
+                        first = false;
                 }
+
             }
-
-
-            bool first = true;
-            await foreach (char c in _handler.getSummaryResponse())
+            catch (Exception ex)
             {
-                await Send(_hubContext, debateId, string.Empty, string.Empty, c.ToString(), first, true);
-                if (first)
-                    first = false;
+                //LOG ERROR HERE
+
+                await _hubContext.Clients.Group(debateId).SendAsync("DebateError", new
+                {
+                    debateId,
+                    error = "There was a problem with the debate.  Debate has ended."
+                });
             }
         }
     }
