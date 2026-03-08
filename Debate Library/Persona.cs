@@ -27,7 +27,7 @@ namespace Debate_Library
         {
             Persona persona = new Persona(personality, traits, job, experiences);
 
-            persona.Name = await AINamer.getInstance(AIModel).getName(persona) ?? throw new IOException("Couldn't get a name");
+            persona.Name = await new AINamer(AIModel).getName(persona) ?? throw new IOException("Couldn't get a name");
 
             return persona;
         }
