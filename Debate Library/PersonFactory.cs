@@ -15,15 +15,17 @@ namespace Debate_Library
             return await Persona.CreatePerson(model, rnd.ChooseFromAllMBTI(), rnd.ChooseTraits(), rnd.ChooseVocation(), rnd.ChooseExperiences());
         }
 
+        /// <summary>
+        /// Runs all the create person tasks in parallel and returns a list of the created personas.
+        /// </summary>
+        /// <param name="model">AI Model</param>
+        /// <param name="num">Number of people to create</param>
+        /// <returns></returns>
         public async Task<List<Persona>> CreatePeople(string model, int num)
         {
-            List<Persona> toReturn = new List<Persona>();
-            for (int i = 0; i < num; i++)
-            {
-                toReturn.Add(await CreatePerson(model));
-            }
+            var tasks = Enumerable.Range(0, num).Select(_ => CreatePerson(model));
 
-            return toReturn;
+            return (await Task.WhenAll(tasks)).ToList();
         }
     }
 }
