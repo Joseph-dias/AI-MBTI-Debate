@@ -72,7 +72,7 @@ namespace Debate_Library
                 MaxOutputTokenCount = 500
             };
 
-            await foreach (StreamingChatCompletionUpdate update in client.GetChatClient(model).CompleteChatStreamingAsync(messages))
+            await foreach (StreamingChatCompletionUpdate update in client.GetChatClient(model).CompleteChatStreamingAsync(messages, options))
             {
                 yield return update;
             }
