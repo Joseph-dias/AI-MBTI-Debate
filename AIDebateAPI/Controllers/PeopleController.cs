@@ -31,8 +31,9 @@ namespace AIDebateAPI.Controllers
                 List<Persona> people = await _personFactory.CreatePeople(BASE_AI.MODEL, num) ?? new();
                 PeopleDTO.people = people != null ? (await Task.WhenAll(people.Select(p => PersonaDTO.CreateDTO(p)))).ToList() : new(); //Attempting to create people
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine($"Error {e.Message}");
                 return Problem(
                     detail: "Failed to generate the people. Please try again shortly.",
                     statusCode: StatusCodes.Status500InternalServerError,
