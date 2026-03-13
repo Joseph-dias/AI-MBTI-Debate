@@ -50,7 +50,7 @@ namespace AIDebateAPI.Controllers
         {
             try
             {
-                Task.Delay(7000).Wait(); // wait for clients to connect to the hub
+                await Task.Delay(7000); // wait for clients to connect to the hub
                 Dictionary<Persona, int> spoken = info.People.people.Select(p => PersonaDTO.CreatePersona(p)).ToDictionary(p => p, p => 0);
 
                 List<Persona> finishedDebaters = new List<Persona>();
