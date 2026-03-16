@@ -10,10 +10,12 @@ namespace AI_MBTI_Debate
 {
     public static class ConnectToSignalR
     {
-        public static async Task Listen(string debateId)
+        // Accept the key so the caller can pass it in rather than hardcoding it here
+        public static async Task Listen(string debateId, string apiKey)
         {
             var connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:7139/hubs/debate")
+                // Append the key to the URL — SignalR can't use headers for auth over WebSocket
+                .WithUrl($"https://localhost:7139/hubs/debate?apiKey={apiKey}")
                 //.ConfigureLogging(logging => logging.AddConsole().SetMinimumLevel(LogLevel.Trace))
                 .Build();
             connection.On<object>("ReceiveChunk", payload =>
