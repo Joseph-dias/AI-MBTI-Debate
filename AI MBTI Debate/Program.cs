@@ -7,10 +7,16 @@ using System.Text;
 using System.Text.Json;
 using static System.Random;
 
+// Temporary key - matches the placeholder in the API's appsettings.json for local dev.
+// When the API is set up with a real key via environment variable, update this to match.
+const string ApiKey = "CHANGE_ME";
+
 HttpClient client = new HttpClient
 {
     BaseAddress = new Uri("https://localhost:7139/")
 };
+// Stamp every outgoing request with the key so we don't have to add it per-call
+client.DefaultRequestHeaders.Add("X-Api-Key", ApiKey);
 
 JsonSerializerOptions options = new JsonSerializerOptions
 {
@@ -76,4 +82,4 @@ if (result?.TryGetValue("debateId", out debateId) == true)
     Console.WriteLine($"Debate started! Debate ID = {debateId}");
 }
 
-await ConnectToSignalR.Listen(debateId ?? string.Empty);
+await ConnectToSignalR.Listen(debateId ?? string.Empty, ApiKey);
