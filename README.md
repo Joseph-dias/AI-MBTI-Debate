@@ -1,6 +1,6 @@
 # AI-MBTI-Debate
 
-An AI-powered debate simulator where distinct MBTI personality types argue various topics—each remaining faithful to their type’s characteristic reasoning, values, communication style, and worldview tendencies. This project explores how different personalities might approach debates, drawing on structured AI to simulate realistic interactions.
+An AI-powered debate simulator where distinct MBTI personality types argue various topics—each remaining faithful to their type’s characteristic reasoning, values, communication style, and worldview.
 
 ## Core Features
 
@@ -90,3 +90,7 @@ Root files include .gitattributes, .gitignore, AI MBTI Debate.sln, and README.md
 ## Contributing
 
 Pull requests are welcome. Focus on API development, adding more MBTI fidelity, or enhancing debate logic.
+
+## License
+
+This project is licensed under the [GNU General Public License v2](./LICENSE).
